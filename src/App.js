@@ -1,25 +1,63 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from 'react';
+import {
+  Route,
+  Switch,
+  Redirect,
+  withRouter,
+} from 'react-router-dom';
+import { connect } from 'react-redux';
+import { useHistory } from "react-router-dom";
 
-function App() {
+import Login from './Pages/Login';
+import Live from './Pages/Live';
+import Verify from './Pages/Verify';
+
+
+import { getUserDataRequest } from './store/login/actions';
+
+const App = (props) => {
+  const {
+    user,
+    getUserDataRequest,
+  } = props;
+
+  const history = useHistory();
+  useEffect(() => {
+    if (!user && localStorage.getItem('user')) {
+      getUserDataRequest();
+    }
+    user && history.push('/live')
+  }, [user]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+        <>
+          <Switch>
+            {!user ? 
+            <>
+              <Route
+                path="/login"
+                component={Login}
+              />
+              <Route
+                path="/verify"
+                component={Verify}
+              />
+            </>
+          : <Route
+          path="/live"
+          component={Live}
+        />}
+          </Switch>
+        </>
   );
-}
+};
 
-export default App;
+const mapStateToProps = (state) => ({
+  user: state.loginReducer.user,
+});
+
+const mapDispatchToProps = {
+  getUserDataRequest,
+};
+
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));

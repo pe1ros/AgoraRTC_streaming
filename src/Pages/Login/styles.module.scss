@@ -1,0 +1,26 @@
+.login_screen{
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  &_wrapper{
+    width: 300px;
+    height: 200px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  &_mask{
+    height: 100px;
+    font-size: 24px;
+    align-self: center;
+    margin-top: 30px;
+  }
+  &_input{
+    width: 200px;
+    height: 100px;
+    margin: 30px;
+    align-self: center;
+  }
+}
