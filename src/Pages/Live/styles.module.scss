@@ -1,4 +1,8 @@
 .live{
+  &__main{
+    height: 100%;
+    width: 100%;
+  }
   &__mainWindow{
     width: 1000px;
     height: 600px;
@@ -6,6 +10,7 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    margin: 10% auto;
    }
   &__subscribers{
     width: 200px;
@@ -32,6 +37,15 @@
   &__btnEnd{
     width: 100px;
     height: 50px;
+  }
+  &__btnShare{
+    width: 100px;
+    height: 50px;
+  }
+  &__btnShareActive{
+    width: 100px;
+    height: 50px;
+    background-color: red;
   }
   &__buttonwrapper{
     display: flex;

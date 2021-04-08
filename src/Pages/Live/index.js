@@ -138,7 +138,12 @@ const Live = ({agoraTokenRequest, agoraToken, user}) => {
         <div className={styles.live__buttonwrapper}>
           <button type="button" onClick={() => startStream(user)} className={styles.live__btnStart}>Start</button>
           <button type="button" onClick={endStream} className={styles.live__btnEnd}>End</button>
-          <button type="button" onClick={() => shareScreen(share, setShare)} className={styles.live__btnEnd}>{share ? 'Stop share' : 'Share screen'}</button>
+          <button
+            type="button"
+            onClick={() => shareScreen(share, setShare)} 
+            className={share ? styles.live__btnShareActive : styles.live__btnShare}>
+              {share ? 'Stop share' : 'Share screen'}
+          </button>
         </div>
       </div>
     </div>
