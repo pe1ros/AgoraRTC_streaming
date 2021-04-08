@@ -2,7 +2,7 @@
   &__mainWindow{
     width: 1000px;
     height: 600px;
-    border: 2px solid;
+    border: 1px solid;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -10,11 +10,10 @@
   &__subscribers{
     width: 200px;
     max-height: 600px;
-    overflow: scroll;
-    display: flex;
-    flex-direction: column;
+    overflow-y: scroll;
+    display: block;
     align-items: center;
-    border: 2px solid black;
+    border: 1px solid;
   }
   &__singleUser{
     align-self: center;
@@ -36,11 +35,23 @@
   }
   &__buttonwrapper{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    width: 120px;
   }
   &__lectorwindow{
     width: 840px;
     height: 600px ;
     border: 2px solid black;
+  }
+  &__remoteUser{
+    width: 150px;
+    height: 150px;
+    background-color: gray;
+    border: 2px solid black;
+  }
+  &__remoteUserMute{
+    width: 150px;
+    height: 150px;
+    border: 2px solid red;
   }
 }

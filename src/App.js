@@ -6,7 +6,6 @@ import {
   withRouter,
 } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { useHistory } from "react-router-dom";
 
 import Login from './Pages/Login';
 import Live from './Pages/Live';
@@ -14,39 +13,33 @@ import Verify from './Pages/Verify';
 
 
 import { getUserDataRequest } from './store/login/actions';
+import PrivateRoute from './components/PrivateRoute';
 
-const App = (props) => {
-  const {
-    user,
-    getUserDataRequest,
-  } = props;
+const App = ({user, getUserDataRequest}) => {
 
-  const history = useHistory();
   useEffect(() => {
     if (!user && localStorage.getItem('user')) {
       getUserDataRequest();
     }
-    user && history.push('/live')
   }, [user]);
 
   return (
         <>
           <Switch>
-            {!user ? 
-            <>
               <Route
-                path="/login"
-                component={Login}
-              />
+              path="/login"
+              render={() => (!user
+                ? <Login />
+                : <Redirect to={`/live`} />)}
+            />
               <Route
-                path="/verify"
-                component={Verify}
-              />
-            </>
-          : <Route
-          path="/live"
-          component={Live}
-        />}
+              path="/verify"
+              render={() => (!user
+                ? <Verify />
+                : <Redirect to={`/live`} />)}
+            />
+            <PrivateRoute path="/live" component={Live} />
+            <Route path="*" render={() => <Redirect to="/login" />} />
           </Switch>
         </>
   );

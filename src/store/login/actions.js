@@ -1,4 +1,6 @@
 import {
+  GET_AGORA_TOKEN_FAILURE,
+  GET_AGORA_TOKEN_SUCCESS,
   GET_USERDATA_FAILURE,
   GET_USERDATA_SUCCESS,
   LOGIN_FAILURE,
@@ -9,6 +11,7 @@ import {
 import loginRequestInstance from '../../api/login';
 import userDataRequestInstance from '../../api/users_me';
 import verifyRequestInstance from '../../api/verify';
+import agforaTokenRequestInstance from '../../api/agora_token';
 
 export function setloginNumber(payload) {
   return {
@@ -39,6 +42,19 @@ export function getUserDataSuccess(payload) {
 export function getUserDataFailure(payload) {
   return {
     type: GET_USERDATA_FAILURE,
+    payload
+  };
+}
+
+export function agoraTokenSuccess(payload) {
+  return {
+    type: GET_AGORA_TOKEN_SUCCESS,
+    payload
+  };
+}
+export function agoraTokenFailure(payload) {
+  return {
+    type: GET_AGORA_TOKEN_FAILURE,
     payload
   };
 }
@@ -76,5 +92,18 @@ export const verifyRequest = (
         return;
       }
       dispatch(loginFailure(res.error));
+  };
+};
+
+export const agoraTokenRequest = (
+  data,
+) => {
+  return async (dispatch) => {
+      const res = await agforaTokenRequestInstance(data);
+      if(!res.error){
+        dispatch(agoraTokenSuccess(res.data))
+        return;
+      }
+      dispatch(agoraTokenFailure(res.error));
   };
 };

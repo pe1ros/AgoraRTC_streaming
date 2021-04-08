@@ -10,7 +10,6 @@ function setToken() {
 }
 
 const instance = axios.create({
-  baseURL: 'http://192.168.88.219:6800/api/v1',
   headers: {
     device: 'IPhone',
   },
