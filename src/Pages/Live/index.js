@@ -2,8 +2,7 @@ import React, {useEffect, useState} from 'react';
 import { connect } from 'react-redux';
 import AgoraRTC, { IAgoraRTCClient } from 'agora-rtc-sdk-ng';
 
-import {agoraTokenRequest} from '../../store/login/actions';
-
+import {agoraTokenRequest, agoraStreamRequest, agoraStartRecordRequest, agoraStopRecordRequest, agoraQueryRecordRequest} from '../../store/login/actions';
 import styles from './styles.module.scss';
 
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8'});
@@ -17,17 +16,6 @@ let options = {
   appId: 'a234c6cd9e27460d881b1158758aaf38',
   channel: 'nissi',
   token: null,
-};
-
-const toggleAudio = (user) => {
-  const player = document.getElementById(user.uid);
-  if (user.audioTrack.isPlaying) {
-    user.audioTrack.stop();
-    player.style.border = 'solid 3px #ff0000';
-  } else {
-    user.audioTrack.play();
-    player.style.border = 'solid 3px #000';
-  }
 };
 
 client.on('user-published', async (user, mediaType) => {
@@ -78,12 +66,12 @@ const startStream = async (user) => {
 };
 
 const endStream = async () => {
-    rtc.localAudioTrack.close();
-    rtc.localVideoTrack.close();
-    client.remoteUsers.forEach(user => {
-    const playerContainer = document.getElementById("player");
-    playerContainer.removeChild();
-  });
+  const playerContainer = document.getElementById("player");
+  const subContainer = document.getElementById("subs");
+  playerContainer.innerHTML = '';
+  subContainer.innerHTML = '';
+  rtc.localAudioTrack.close();
+  rtc.localVideoTrack.close();
   await client.leave();
 };
 
@@ -116,15 +104,40 @@ const shareScreen = async (share, setShare) => {
   
 };
 
-const Live = ({agoraTokenRequest, agoraToken, user}) => {
+const toggleAudio = (user) => {
+  const player = document.getElementById(user.uid);
+  if (user.audioTrack.isPlaying) {
+    user.audioTrack.stop();
+    player.style.border = 'solid 3px #ff0000';
+  } else {
+    user.audioTrack.play();
+    player.style.border = 'solid 3px #000';
+  }
+};
+
+
+const Live = ({agoraTokenRequest, agoraToken, user, agoraStreamRequest, agoraStreamId, agoraStartRecordRequest, agoraStopRecordRequest, recordInfo, agoraQueryRecordRequest}) => {
   const [share, setShare] = useState(false);
+
+  const cloudRecord = async (user, agoraStreamId) => {
+    agoraStartRecordRequest({userId: user.id, channelName: "nissi", resourceId: agoraStreamId, mode: "mix"});
+  };
+
+  const cloudRecordStop = async (user, agoraStreamId) => {
+    agoraStopRecordRequest({userId: user.id, channelName: "nissi", resourceId: recordInfo.resourceId, sid: recordInfo.sid, mode: "mix"});
+  };
+
+  const queryRecord = async (recordInfo) => {
+    agoraQueryRecordRequest({resourceId: recordInfo.resourceId, sid: recordInfo.sid, mode: "mix"});
+  };
 
   useEffect(() => {
     if (!agoraToken && user) {
       agoraTokenRequest({userId: user.id, channelName: 'nissi', role: 'host'});
+      agoraStreamRequest({userId: user.id, channelName: 'nissi'});
     }
     options.token = agoraToken;
-  }, [agoraToken, user])
+  }, [agoraToken, user, agoraStreamId])
 
   return (
     <div className={styles.live__main}>
@@ -137,7 +150,10 @@ const Live = ({agoraTokenRequest, agoraToken, user}) => {
         </div>
         <div className={styles.live__buttonwrapper}>
           <button type="button" onClick={() => startStream(user)} className={styles.live__btnStart}>Start</button>
-          <button type="button" onClick={endStream} className={styles.live__btnEnd}>End</button>
+          <button type="button" onClick={() => endStream()} className={styles.live__btnEnd}>End</button>
+          <button type="button" onClick={() => cloudRecord(user, agoraStreamId)} className={styles.live__btnEnd}>start Record</button>
+          <button type="button" onClick={() => queryRecord(recordInfo)} className={styles.live__btnEnd}>Query Record</button>
+          <button type="button" onClick={() => cloudRecordStop(user, agoraStreamId)} className={styles.live__btnEnd}>stop Record</button>
           <button
             type="button"
             onClick={() => shareScreen(share, setShare)} 
@@ -152,8 +168,14 @@ const Live = ({agoraTokenRequest, agoraToken, user}) => {
 const mapStateToProps = (state) => ({
   user: state.loginReducer.user,
   agoraToken: state.loginReducer.agoraToken,
+  agoraStreamId: state.loginReducer.agoraStreamId,
+  recordInfo: state.loginReducer.recordInfo,
 });
 const mapDispatchToProps = {
   agoraTokenRequest,
+  agoraStreamRequest,
+  agoraStartRecordRequest,
+  agoraStopRecordRequest,
+  agoraQueryRecordRequest,
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Live);
