@@ -11,6 +11,8 @@ import {
   GET_AGORA_STREAM_FAILURE,
   START_RECORD_AGORA_STREAM_SUCCESS,
   START_RECORD_AGORA_STREAM_FAILURE,
+  GET_AGORA_TOKEN_RTM_SUCCESS,
+  GET_AGORA_TOKEN_RTM_FAILURE,
 } from '../constants';
 
 const initState = {
@@ -19,6 +21,7 @@ const initState = {
   agoraToken: null,
   agoraStreamId: null,
   recordInfo: null,
+  agoraTokenRtm: null,
   errors: '',
 }
 
@@ -56,6 +59,16 @@ function loginReducer(state = initState, action) {
         agoraToken: action.payload,
       } 
     case GET_AGORA_TOKEN_FAILURE:
+      return {
+        ...state,
+        error: action.payload,
+      }
+    case GET_AGORA_TOKEN_RTM_SUCCESS:
+      return {
+        ...state,
+        agoraTokenRtm: action.payload,
+      } 
+    case GET_AGORA_TOKEN_RTM_FAILURE:
       return {
         ...state,
         error: action.payload,

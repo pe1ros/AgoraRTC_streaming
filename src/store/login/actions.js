@@ -2,6 +2,8 @@ import {
   GET_AGORA_STREAM_FAILURE,
   GET_AGORA_STREAM_SUCCESS,
   GET_AGORA_TOKEN_FAILURE,
+  GET_AGORA_TOKEN_RTM_FAILURE,
+  GET_AGORA_TOKEN_RTM_SUCCESS,
   GET_AGORA_TOKEN_SUCCESS,
   GET_USERDATA_FAILURE,
   GET_USERDATA_SUCCESS,
@@ -22,6 +24,7 @@ import agoraStreamRequestInstance from '../../api/agora_stream';
 import agoraStartRecordRequestInstance from '../../api/start_record';
 import agoraStopRecordRequestInstance from '../../api/stop_record';
 import agoraQueryRecordRequestInstance from '../../api/query_record';
+import agforaTokenRtmRequestInstance from '../../api/agora_rtm_token';
 
 export function setloginNumber(payload) {
   return {
@@ -110,6 +113,19 @@ export function agoraStopRecordFailure(payload) {
   };
 }
 
+export function agoraTokenRtmSuccess(payload) {
+  return {
+    type: GET_AGORA_TOKEN_RTM_SUCCESS,
+    payload
+  };
+}
+export function agoraTokenRtmFailure(payload) {
+  return {
+    type: GET_AGORA_TOKEN_RTM_FAILURE,
+    payload
+  };
+}
+
 export const loginRequest = (
   data,
 ) => {
@@ -159,6 +175,18 @@ export const agoraTokenRequest = (
   };
 };
 
+export const agoraTokenRtmRequest = (
+  data,
+) => {
+  return async (dispatch) => {
+      const res = await agforaTokenRtmRequestInstance(data);
+      if(!res.error){
+        dispatch(agoraTokenRtmSuccess(res.data))
+        return;
+      }
+      dispatch(agoraTokenRtmFailure(res.error));
+  };
+};
 export const agoraStreamRequest = (
   data,
 ) => {

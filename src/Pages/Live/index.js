@@ -2,11 +2,21 @@ import React, {useEffect, useState} from 'react';
 import { connect } from 'react-redux';
 import AgoraRTC, { IAgoraRTCClient } from 'agora-rtc-sdk-ng';
 
-import {agoraTokenRequest, agoraStreamRequest, agoraStartRecordRequest, agoraStopRecordRequest, agoraQueryRecordRequest} from '../../store/login/actions';
+import AgoraRTM from 'agora-rtm-sdk';
+import {
+  agoraTokenRequest,
+  agoraStreamRequest,
+  agoraStartRecordRequest,
+  agoraStopRecordRequest,
+  agoraQueryRecordRequest,
+  agoraTokenRtmRequest
+} from '../../store/login/actions';
 import styles from './styles.module.scss';
 
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8'});
+
 let subscribers = [];
+let chatMessages = [];
 const rtc = {
   localAudioTrack: null,
   localVideoTrack: null,
@@ -16,8 +26,31 @@ let options = {
   appId: 'a234c6cd9e27460d881b1158758aaf38',
   channel: 'nissi',
   token: null,
+  tokenRtm: null,
 };
 
+const clientMessage = AgoraRTM.createInstance('a234c6cd9e27460d881b1158758aaf38'); 
+const channel = clientMessage.createChannel('nissi');
+
+const login = (token, account) => {
+
+  clientMessage.login({ token: token, uid: account }).then(() => {
+    channel.join().then(() => {
+      console.log('JOINED');
+      }).catch(error => {
+        console.log('NOT_JOINED', error);
+      });
+  }).catch(err => {
+    console.log('AgoraRTM client login failure', err);
+  });
+}
+
+clientMessage.on('ConnectionStateChanged', (newState, reason) => {
+console.log('on connection state changed to ' + newState + ' reason: ' + reason);
+});
+channel.on('ChannelMessage', (message, memberId, messageProps) => {
+  chatMessages.push({userId: memberId, message: message.text})
+  });
 client.on('user-published', async (user, mediaType) => {
   await client.subscribe(user, mediaType);
   const playerContainer = document.getElementById("subs");
@@ -115,9 +148,21 @@ const toggleAudio = (user) => {
   }
 };
 
-
-const Live = ({agoraTokenRequest, agoraToken, user, agoraStreamRequest, agoraStreamId, agoraStartRecordRequest, agoraStopRecordRequest, recordInfo, agoraQueryRecordRequest}) => {
+const Live = ({
+  agoraTokenRequest,
+  agoraToken,
+  user,
+  agoraStreamRequest,
+  agoraStreamId,
+  agoraStartRecordRequest,
+  agoraStopRecordRequest,
+  recordInfo,
+  agoraQueryRecordRequest,
+  agoraTokenRtmRequest,
+  agoraTokenRtm
+}) => {
   const [share, setShare] = useState(false);
+  const [text, setText] = useState('');
 
   const cloudRecord = async (user, agoraStreamId) => {
     agoraStartRecordRequest({userId: user.id, channelName: "nissi", resourceId: agoraStreamId, mode: "mix"});
@@ -131,13 +176,32 @@ const Live = ({agoraTokenRequest, agoraToken, user, agoraStreamRequest, agoraStr
     agoraQueryRecordRequest({resourceId: recordInfo.resourceId, sid: recordInfo.sid, mode: "mix"});
   };
 
+  const handleChange = (e) => {
+    setText(e.target.value)
+  };
+
+  const sendMessage = () => {
+    channel.sendMessage({ text: text }).then(() => {
+    }).catch(error => {
+      console.log("NOT_SENDED", error);
+    });
+    chatMessages.push({userId: user.id, message: text})
+    setText('');
+  };
+
   useEffect(() => {
     if (!agoraToken && user) {
       agoraTokenRequest({userId: user.id, channelName: 'nissi', role: 'host'});
       agoraStreamRequest({userId: user.id, channelName: 'nissi'});
+      agoraTokenRtmRequest({account: user.id});
     }
     options.token = agoraToken;
+    options.tokenRtm = agoraTokenRtm;
   }, [agoraToken, user, agoraStreamId])
+
+  useEffect(() => {
+    agoraTokenRtm && login(agoraTokenRtm, `${user.id}`)
+  }, [agoraTokenRtm])
 
   return (
     <div className={styles.live__main}>
@@ -147,6 +211,12 @@ const Live = ({agoraTokenRequest, agoraToken, user, agoraStreamRequest, agoraStr
         </div>
         <div className={styles.live__lectorwindow} id='player'>
 
+        </div>
+        <div className={styles.live__chatroom}>
+          {chatMessages.map((date, index) => <div key={index} className={styles.live__chatmessage}>user:{date.userId} message:{date.message}</div>
+          )}
+          <input type='text' onChange={handleChange} className={styles.live__chatroomInput} value={text} />
+          <button type="button" onClick={sendMessage} className={styles.live__btnEnd}>Send</button>
         </div>
         <div className={styles.live__buttonwrapper}>
           <button type="button" onClick={() => startStream(user)} className={styles.live__btnStart}>Start</button>
@@ -170,6 +240,7 @@ const mapStateToProps = (state) => ({
   agoraToken: state.loginReducer.agoraToken,
   agoraStreamId: state.loginReducer.agoraStreamId,
   recordInfo: state.loginReducer.recordInfo,
+  agoraTokenRtm: state.loginReducer.agoraTokenRtm,
 });
 const mapDispatchToProps = {
   agoraTokenRequest,
@@ -177,5 +248,6 @@ const mapDispatchToProps = {
   agoraStartRecordRequest,
   agoraStopRecordRequest,
   agoraQueryRecordRequest,
+  agoraTokenRtmRequest,
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Live);
