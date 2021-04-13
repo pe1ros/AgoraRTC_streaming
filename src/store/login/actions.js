@@ -206,7 +206,7 @@ export const agoraQueryRecordRequest = (
 ) => {
   return async (dispatch) => {
       const res = await agoraQueryRecordRequestInstance(data);
-      console.log("QUERY_RECORD", res);
+      console.log("QUERY_RECORD", JSON.parse(res.data));
     
   };
 };
