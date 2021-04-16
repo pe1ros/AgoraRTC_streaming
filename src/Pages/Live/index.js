@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useDispatch} from 'react';
 import { connect } from 'react-redux';
 import AgoraRTC, { IAgoraRTCClient } from 'agora-rtc-sdk-ng';
 
@@ -9,8 +9,11 @@ import {
   agoraStartRecordRequest,
   agoraStopRecordRequest,
   agoraQueryRecordRequest,
-  agoraTokenRtmRequest
+  agoraTokenRtmRequest,
+  newChatMessage,
 } from '../../store/login/actions';
+import store from '../../store/index';
+
 import styles from './styles.module.scss';
 
 const client = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8'});
@@ -48,9 +51,11 @@ const login = (token, account) => {
 clientMessage.on('ConnectionStateChanged', (newState, reason) => {
 console.log('on connection state changed to ' + newState + ' reason: ' + reason);
 });
+
 channel.on('ChannelMessage', (message, memberId, messageProps) => {
-  chatMessages.push({userId: memberId, message: message.text})
-  });
+  store.dispatch(newChatMessage({userId: memberId, message: message.text}))
+});
+
 client.on('user-published', async (user, mediaType) => {
   await client.subscribe(user, mediaType);
   const playerContainer = document.getElementById("subs");
@@ -159,7 +164,9 @@ const Live = ({
   recordInfo,
   agoraQueryRecordRequest,
   agoraTokenRtmRequest,
-  agoraTokenRtm
+  agoraTokenRtm,
+  newChatMessage,
+  chatMessages,
 }) => {
   const [share, setShare] = useState(false);
   const [text, setText] = useState('');
@@ -185,7 +192,7 @@ const Live = ({
     }).catch(error => {
       console.log("NOT_SENDED", error);
     });
-    chatMessages.push({userId: user.id, message: text})
+    newChatMessage({userId: user.id, message: text});
     setText('');
   };
 
@@ -241,6 +248,7 @@ const mapStateToProps = (state) => ({
   agoraStreamId: state.loginReducer.agoraStreamId,
   recordInfo: state.loginReducer.recordInfo,
   agoraTokenRtm: state.loginReducer.agoraTokenRtm,
+  chatMessages: state.loginReducer.chatMessages,
 });
 const mapDispatchToProps = {
   agoraTokenRequest,
@@ -249,5 +257,6 @@ const mapDispatchToProps = {
   agoraStopRecordRequest,
   agoraQueryRecordRequest,
   agoraTokenRtmRequest,
+  newChatMessage,
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Live);

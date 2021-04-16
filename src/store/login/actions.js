@@ -14,6 +14,7 @@ import {
   START_RECORD_AGORA_STREAM_SUCCESS,
   STOP_RECORD_AGORA_STREAM_FAILURE,
   STOP_RECORD_AGORA_STREAM_SUCCESS,
+  ADD_NEW_CHAT_MESSAGE,
 } from '../constants';
 
 import loginRequestInstance from '../../api/login';
@@ -126,6 +127,13 @@ export function agoraTokenRtmFailure(payload) {
   };
 }
 
+export function newChatMessage(payload) {
+  return {
+    type: ADD_NEW_CHAT_MESSAGE,
+    payload
+  };
+}
+
 export const loginRequest = (
   data,
 ) => {
@@ -193,7 +201,7 @@ export const agoraStreamRequest = (
   return async (dispatch) => {
       const res = await agoraStreamRequestInstance(data);
       if(!res.error){
-        dispatch(agoraStreamSuccess(JSON.parse(res.data)?.resourceId))
+        dispatch(agoraStreamSuccess(res.data.resourceId));
         return;
       }
       dispatch(agoraStreamFailure(res.error));
@@ -207,7 +215,7 @@ export const agoraStartRecordRequest = (
   return async (dispatch) => {
       const res = await agoraStartRecordRequestInstance(data);
       if(!res.error){
-        dispatch(agoraStartRecordSuccess(JSON.parse(res.data)));
+        dispatch(agoraStartRecordSuccess(res.data));
         return;
       }
       dispatch(agoraStartRecordFailure(res.error));
@@ -221,7 +229,7 @@ export const agoraStopRecordRequest = (
   return async (dispatch) => {
       const res = await agoraStopRecordRequestInstance(data);
       if(!res.error){
-        dispatch(agoraStopRecordSuccess(JSON.parse(res.data)));
+        dispatch(agoraStopRecordSuccess(res.data));
         return;
       }
       dispatch(agoraStopRecordFailure(res.error));

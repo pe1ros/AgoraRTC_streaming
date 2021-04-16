@@ -13,6 +13,7 @@ import {
   START_RECORD_AGORA_STREAM_FAILURE,
   GET_AGORA_TOKEN_RTM_SUCCESS,
   GET_AGORA_TOKEN_RTM_FAILURE,
+  ADD_NEW_CHAT_MESSAGE,
 } from '../constants';
 
 const initState = {
@@ -22,6 +23,7 @@ const initState = {
   agoraStreamId: null,
   recordInfo: null,
   agoraTokenRtm: null,
+  chatMessages: [],
   errors: '',
 }
 
@@ -92,6 +94,11 @@ function loginReducer(state = initState, action) {
       return {
         ...state,
         error: action.payload,
+      }
+    case ADD_NEW_CHAT_MESSAGE:
+      return {
+        ...state,
+        chatMessages: [...state.chatMessages, action.payload]
       }
     case LOGOUT:
       return {
