@@ -87,7 +87,7 @@ client.on('user-unpublished', (user) => {
 });
 
 const startStream = async (user) => {
-  const uid = await client.join(options.appId, options.channel, options.token, user.id);
+  const uid = await client.join(options.appId, options.channel, options.token, 555);
   const wrapper = document.getElementById("player");
   rtc.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
   rtc.localVideoTrack = await AgoraRTC.createCameraVideoTrack();
@@ -172,11 +172,11 @@ const Live = ({
   const [text, setText] = useState('');
 
   const cloudRecord = async (user, agoraStreamId) => {
-    agoraStartRecordRequest({userId: user.id, channelName: "nissi", resourceId: agoraStreamId, mode: "mix"});
+    agoraStartRecordRequest({userId: 999, channelName: "nissi", resourceId: agoraStreamId, mode: "mix", tok: agoraToken});
   };
 
   const cloudRecordStop = async (user, agoraStreamId) => {
-    agoraStopRecordRequest({userId: user.id, channelName: "nissi", resourceId: recordInfo.resourceId, sid: recordInfo.sid, mode: "mix"});
+    agoraStopRecordRequest({userId: 999, channelName: "nissi", resourceId: recordInfo.resourceId, sid: recordInfo.sid, mode: "mix"});
   };
 
   const queryRecord = async (recordInfo) => {
@@ -198,8 +198,8 @@ const Live = ({
 
   useEffect(() => {
     if (!agoraToken && user) {
-      agoraTokenRequest({userId: user.id, channelName: 'nissi', role: 'host'});
-      agoraStreamRequest({userId: user.id, channelName: 'nissi'});
+      agoraTokenRequest({userId: 555, channelName: 'nissi', role: 'host'});
+      agoraStreamRequest({userId: 999, channelName: 'nissi'});
       agoraTokenRtmRequest({account: user.id});
     }
     options.token = agoraToken;
