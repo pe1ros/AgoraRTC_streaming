@@ -195,7 +195,7 @@ export const agoraTokenRtmRequest = (
       dispatch(agoraTokenRtmFailure(res.error));
   };
 };
-export const agoraStreamRequest = (
+export const agoraStreamResourceRequest = (
   data,
 ) => {
   return async (dispatch) => {
